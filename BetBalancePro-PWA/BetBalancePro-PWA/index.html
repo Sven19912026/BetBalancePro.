@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="description" content="BetBalance Pro – lokale Übersicht für Sportwetten, Einsätze, Ein- und Auszahlungen sowie Ziele.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<title>BetBalance Pro</title>
+<style>
+:root{
+  --bg:#08111f;
+  --bg2:#0e1728;
+  --panel:#111c30;
+  --panel2:#18243a;
+  --line:#263550;
+  --text:#f7f9fc;
+  --muted:#91a0b8;
+  --green:#25d07f;
+  --red:#ff5d6c;
+  --blue:#5b8cff;
+  --yellow:#f5b942;
+  --shadow:0 16px 40px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{
+  margin:0;
+  min-height:100vh;
+  color:var(--text);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:
+    radial-gradient(circle at top right,rgba(91,140,255,.16),transparent 32%),
+    linear-gradient(180deg,var(--bg),var(--bg2));
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{max-width:760px;margin:0 auto;min-height:100vh}
+header{
+  padding:20px 16px 12px;
+  position:sticky;
+  top:0;
+  z-index:20;
+  background:linear-gradient(180deg,rgba(8,17,31,.98),rgba(8,17,31,.88));
+  backdrop-filter:blur(14px);
+}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand h1{font-size:24px;margin:0;letter-spacing:-.5px}
+.brand small{display:block;color:var(--muted);margin-top:3px}
+.badge{
+  background:rgba(91,140,255,.16);
+  color:#b7c8ff;
+  border:1px solid rgba(91,140,255,.35);
+  padding:7px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+}
+main{padding:10px 14px 100px}
+.page{display:none}
+.page.active{display:block}
+.hero{
+  background:linear-gradient(135deg,#1d2f52,#15233b 60%,#11203a);
+  border:1px solid #2b3f63;
+  border-radius:24px;
+  padding:20px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  position:relative;
+}
+.hero:after{
+  content:"";
+  position:absolute;
+  width:170px;height:170px;
+  right:-80px;top:-90px;
+  border-radius:50%;
+  background:rgba(91,140,255,.14);
+}
+.eyebrow{font-size:12px;color:#b6c5da;text-transform:uppercase;letter-spacing:.1em}
+.amount{font-size:40px;font-weight:900;letter-spacing:-1.5px;margin:8px 0}
+.goal-line{display:flex;justify-content:space-between;gap:10px;color:#ced8e7;font-size:14px;margin-top:12px}
+.progress{
+  height:14px;
+  border-radius:999px;
+  background:#0a1323;
+  border:1px solid #2a3b56;
+  overflow:hidden;
+  margin-top:10px;
+}
+.progress>div{
+  width:0;
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--blue),var(--green));
+  transition:width .35s ease;
+}
+.hero-meta{display:flex;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px;color:#a9b8cc}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+.card{
+  background:rgba(17,28,48,.94);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:15px;
+  box-shadow:0 8px 22px rgba(0,0,0,.15);
+}
+.label{font-size:12px;color:var(--muted);margin-bottom:7px}
+.value{font-size:22px;font-weight:850;letter-spacing:-.4px}
+.green{color:var(--green)}
+.red{color:var(--red)}
+.blue{color:#8fb0ff}
+.yellow{color:var(--yellow)}
+.section-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin:20px 2px 10px;
+}
+.section-head h2{font-size:17px;margin:0}
+.small-btn{
+  border:1px solid var(--line);
+  color:#dce6f4;
+  background:#142137;
+  padding:8px 11px;
+  border-radius:10px;
+  font-size:12px;
+  font-weight:800;
+}
+.action-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}
+.action{
+  border:1px solid var(--line);
+  background:#15233a;
+  color:white;
+  border-radius:15px;
+  padding:14px 8px;
+  font-weight:850;
+}
+.action strong{display:block;font-size:21px;margin-bottom:4px}
+.list{overflow:hidden}
+.row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:12px;
+  padding:13px 0;
+  border-bottom:1px solid var(--line);
+}
+.row:last-child{border-bottom:0}
+.row-title{font-weight:800}
+.row-meta{color:var(--muted);font-size:12px;margin-top:4px;line-height:1.45}
+.row-right{text-align:right}
+.status{
+  display:inline-flex;
+  padding:5px 8px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:850;
+}
+.status.open{background:#243a68;color:#c3d3ff}
+.status.won{background:#153f2d;color:#a8f5cd}
+.status.lost{background:#55202a;color:#ffbdc3}
+.status.cashout{background:#4c3813;color:#ffe2a0}
+.status.void{background:#293246;color:#c9d1df}
+.form-card{
+  background:rgba(17,28,48,.98);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:16px;
+  box-shadow:var(--shadow);
+}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+.field.full{grid-column:1/-1}
+input,select,textarea{
+  width:100%;
+  background:#0b1526;
+  color:white;
+  border:1px solid #2c3d59;
+  border-radius:12px;
+  padding:13px 12px;
+  outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:#5b8cff}
+textarea{min-height:92px;resize:vertical}
+.primary{
+  width:100%;
+  border:0;
+  border-radius:14px;
+  padding:14px;
+  background:linear-gradient(135deg,#4f7fff,#6f98ff);
+  color:white;
+  font-weight:900;
+  box-shadow:0 10px 22px rgba(91,140,255,.25);
+}
+.secondary{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:13px;
+  background:#17243a;
+  color:white;
+  font-weight:850;
+}
+.danger{background:#451b25;color:#ffd1d6;border-color:#70303d}
+.summary{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:9px 15px;
+  align-items:center;
+}
+.summary div:nth-child(odd){color:var(--muted)}
+.summary div:nth-child(even){font-weight:850;text-align:right}
+.empty{color:var(--muted);font-size:13px;padding:8px 0}
+.bottom-nav{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  z-index:30;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  max-width:760px;
+  margin:0 auto;
+  padding-bottom:env(safe-area-inset-bottom);
+  background:rgba(8,17,31,.98);
+  backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);
+}
+.nav{
+  border:0;
+  background:transparent;
+  color:#7f90aa;
+  padding:12px 4px 11px;
+  font-size:11px;
+  font-weight:800;
+}
+.nav span{display:block;font-size:20px;margin-bottom:3px}
+.nav.active{color:white;background:#111c30}
+.milestones{display:flex;gap:8px;overflow:auto;padding-bottom:3px}
+.milestone{
+  min-width:92px;
+  border:1px solid var(--line);
+  background:#132035;
+  border-radius:14px;
+  padding:11px;
+}
+.milestone.done{border-color:#22774e;background:#123c2b}
+.milestone .m-amount{font-weight:900}
+.milestone .m-state{font-size:11px;color:var(--muted);margin-top:4px}
+.delete{
+  border:0;background:transparent;color:#7f90aa;font-size:11px;padding:5px 0 0
+}
+.goal-note{font-size:12px;color:var(--muted);margin-top:8px}
+.goal-editor{border:1px solid var(--line);background:#0d182a;border-radius:16px;padding:13px;margin-top:10px}
+.goal-editor-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.goal-editor-title{font-weight:900}
+.goal-remove{border:0;background:#451b25;color:#ffd1d6;border-radius:10px;padding:8px 10px;font-weight:800}
+.goal-list-summary{display:flex;gap:8px;overflow:auto;margin-top:12px;padding-bottom:2px}
+.goal-chip{min-width:120px;border:1px solid var(--line);background:#132035;border-radius:13px;padding:10px}
+.goal-chip.active{border-color:#5b8cff;background:#172b50}
+.goal-chip.done{border-color:#22774e;background:#123c2b}
+@media(max-width:520px){
+  .form-grid{grid-template-columns:1fr}
+  .field.full{grid-column:auto}
+  .amount{font-size:34px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand">
+    <div>
+      <h1>BetBalance Pro</h1>
+      <small>Deine Challenge. Deine Zahlen.</small>
+    </div>
+    <div class="badge">LOKAL</div>
+  </div>
+</header>
+
+<main>
+  <section id="dashboard" class="page active">
+    <div class="hero">
+      <div class="eyebrow">Aktueller Buchmacher-Kontostand</div>
+      <div id="heroBankroll" class="amount">0,00 €</div>
+      <div class="goal-line"><span id="goalRange">Noch kein Ziel</span><strong id="goalPct">0 %</strong></div>
+      <div class="progress"><div id="goalBar"></div></div>
+      <div class="hero-meta"><span id="goalRemaining">Ziel festlegen</span><span id="betCountHero">0 Wetten</span></div>
+    </div>
+
+    <div class="action-grid">
+      <button class="action" onclick="go('bets',1)"><strong>＋</strong>Neue Wette</button>
+      <button class="action" onclick="go('money',2)"><strong>€</strong>Zahlung</button>
+      <button class="action" onclick="go('goal',3)"><strong>🎯</strong>Ziel</button>
+    </div>
+
+    <div class="grid">
+      <div class="card"><div class="label">Gesamtgewinn/-verlust</div><div id="profit" class="value">0,00 €</div></div>
+      <div class="card"><div class="label">Offene Wetten</div><div id="openCount" class="value yellow">0</div></div>
+      <div class="card"><div class="label">Einzahlungen</div><div id="deposits" class="value green">0,00 €</div></div>
+      <div class="card"><div class="label">Auszahlungen</div><div id="withdrawals" class="value red">0,00 €</div></div>
+    </div>
+
+    <div class="section-head"><h2>Letzte Wetten</h2><button class="small-btn" onclick="go('bets',1)">Alle anzeigen</button></div>
+    <div id="recentBets" class="card list"></div>
+  </section>
+
+  <section id="bets" class="page">
+    <div class="section-head"><h2>Wette eintragen</h2></div>
+    <div class="form-card">
+      <div class="form-grid">
+        <div class="field"><label>Datum</label><input type="date" id="betDate"></div>
+        <div class="field"><label>Uhrzeit</label><input type="time" id="betTime"></div>
+        <div class="field"><label>Quote</label><input type="number" inputmode="decimal" step="0.01" id="odds" placeholder="1,80"></div>
+        <div class="field"><label>Einsatz</label><input type="number" inputmode="decimal" step="0.01" id="stake" placeholder="20,00"></div>
+        <div class="field full"><label>Status</label>
+          <select id="status" onchange="toggleCashout()">
+            <option value="open">Offen</option>
+            <option value="won">Gewonnen</option>
+            <option value="lost">Verloren</option>
+            <option value="cashout">Cashout</option>
+            <option value="void">Storniert</option>
+          </select>
+        </div>
+        <div class="field full" id="cashoutField" style="display:none"><label>Cashout-Betrag</label><input type="number" inputmode="decimal" step="0.01" id="cashoutAmount" placeholder="0,00"></div>
+        <div class="field full"><button id="betSaveButton" class="primary" onclick="addBet()">Wette speichern</button></div>
+      </div>
+    </div>
+
+    <div class="section-head"><h2>Wettverlauf</h2></div>
+    <div id="allBets" class="card list"></div>
+  </section>
+
+  <section id="money" class="page">
+    <div class="section-head"><h2>Ein- oder Auszahlung</h2></div>
+    <div class="form-card">
+      <div class="form-grid">
+        <div class="field"><label>Art</label>
+          <select id="moneyType">
+            <option value="deposit">Einzahlung</option>
+            <option value="withdrawal">Auszahlung</option>
+          </select>
+        </div>
+        <div class="field"><label>Betrag</label><input type="number" inputmode="decimal" step="0.01" id="moneyAmount" placeholder="100,00"></div>
+        <div class="field"><label>Datum</label><input type="date" id="moneyDate"></div>
+        <div class="field"><label>Uhrzeit</label><input type="time" id="moneyTime"></div>
+        
+<div class="field full"><label>Aktueller Buchmacher-Kontostand</label><input type="number" inputmode="decimal" step="0.01" id="bookmakerBalance" placeholder="z. B. 845,50"></div>
+<div class="field full"><button class="secondary" onclick="saveBookmakerBalance()">Kontostand speichern</button></div>
+<div class="field full"><button id="moneySaveButton" class="primary" onclick="addMoney()">Buchung speichern</button></div>
+      </div>
+    </div>
+
+    <div class="section-head"><h2>Gesamtübersicht</h2></div>
+    <div class="card summary">
+      <div>Gesamteinzahlungen</div><div id="sumDeposits">0,00 €</div>
+      <div>Gesamtauszahlungen</div><div id="sumWithdrawals">0,00 €</div>
+      <div>Wettgewinn/-verlust</div><div id="sumProfit">0,00 €</div>
+      <div>Aktueller Buchmacher-Kontostand</div><div id="sumBankroll">0,00 €</div>
+    </div>
+
+    <div class="section-head"><h2>Buchungsverlauf</h2></div>
+    <div id="moneyList" class="card list"></div>
+  </section>
+
+  <section id="goal" class="page">
+    <div class="section-head"><h2>Challenge festlegen</h2></div>
+    <div class="form-card">
+      <div class="form-grid">
+        <div class="field full"><label>Startbetrag</label><input type="number" inputmode="decimal" step="0.01" id="goalStart" placeholder="100"></div>
+        <div class="field full"><div id="goalsEditor"></div></div>
+        <div class="field full"><button class="secondary" type="button" onclick="addGoalEditor()">＋ Weiteres Ziel hinzufügen</button></div>
+        <div class="field full"><button class="primary" onclick="saveGoal()">Ziele speichern</button></div>
+      </div>
+      <div class="goal-note">Du kannst beliebig viele Ziele hinterlegen. Zielbeträge dürfen höher, niedriger oder gleich dem vorherigen Ziel sein. Die Ziele werden in der eingetragenen Reihenfolge geprüft.</div>
+    </div>
+    <div class="section-head"><h2>Fortschritt</h2></div>
+    <div class="hero">
+      <div class="eyebrow">Challenge</div>
+      <div id="goalBankroll" class="amount">0,00 €</div>
+      <div class="goal-line"><span id="goalRange2">Noch kein Ziel</span><strong id="goalPct2">0 %</strong></div>
+      <div class="progress"><div id="goalBar2"></div></div>
+      <div class="hero-meta"><span id="goalRemaining2">Ziel festlegen</span><span id="goalProfit">0,00 € Gewinn</span></div>
+      <div id="goalNoteDisplay" class="goal-note" style="display:none;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);white-space:pre-wrap"></div>
+      <div id="goalChips" class="goal-list-summary"></div>
+    </div>
+
+    <div class="section-head"><h2>Weg zum Ziel</h2></div>
+    <div id="goalHistory" class="card list"></div>
+
+    <div class="section-head"><h2>Datensicherung</h2></div>
+    <div class="form-card">
+      <div class="form-grid">
+        <div class="field full"><button class="secondary" onclick="exportData()">Daten exportieren</button></div>
+        <div class="field full">
+          <label class="secondary" style="display:block;text-align:center;cursor:pointer">Daten importieren
+            <input type="file" accept=".json" onchange="importData(event)" style="display:none">
+          </label>
+        </div>
+        <div class="field full"><button class="secondary danger" onclick="resetData()">Alle Daten löschen</button></div>
+      </div>
+    </div>
+  </section>
+</main>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav active" onclick="go('dashboard',0)"><span>⌂</span>Übersicht</button>
+  <button class="nav" onclick="go('bets',1)"><span>＋</span>Wetten</button>
+  <button class="nav" onclick="go('money',2)"><span>€</span>Zahlungen</button>
+  <button class="nav" onclick="go('goal',3)"><span>🎯</span>Ziel</button>
+</nav>
+
+<script>
+const STORE='betbalance_pro_v1';
+let data=JSON.parse(localStorage.getItem(STORE)||'{"bets":[],"money":[],"goal":null,"bookmakerBalance":0}');
+if(data.bookmakerBalance===undefined)data.bookmakerBalance=0;
+let editingBetId=null;
+let editingMoneyId=null;
+const $=id=>document.getElementById(id);
+const euro=n=>(Number(n)||0).toLocaleString('de-DE',{style:'currency',currency:'EUR'});
+const nowParts=()=>{const d=new Date();return{date:d.toISOString().slice(0,10),time:d.toTimeString().slice(0,5)}};
+const n=nowParts();
+$('betDate').value=n.date;$('betTime').value=n.time;$('moneyDate').value=n.date;$('moneyTime').value=n.time;
+
+function go(id,index){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $(id).classList.add('active');
+  document.querySelectorAll('.nav').forEach((b,i)=>b.classList.toggle('active',i===index));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function save(){localStorage.setItem(STORE,JSON.stringify(data));render()}
+function toggleCashout(){$('cashoutField').style.display=$('status').value==='cashout'?'block':'none'}
+function betProfit(b){
+  if(b.status==='won') return b.stake*(b.odds-1);
+  if(b.status==='lost') return -b.stake;
+  if(b.status==='cashout') return b.cashout-b.stake;
+  return 0;
+}
+function addBet(){
+  const odds=+$('odds').value,stake=+$('stake').value,status=$('status').value,cashout=+$('cashoutAmount').value||0;
+  if(!odds||odds<=1||!stake||stake<=0)return alert('Bitte gültige Quote und Einsatz eintragen.');
+  if(status==='cashout'&&!cashout)return alert('Bitte den Cashout-Betrag eintragen.');
+
+  const bet={id:editingBetId||Date.now(),date:$('betDate').value,time:$('betTime').value,odds,stake,status,cashout};
+
+  if(editingBetId){
+    const index=data.bets.findIndex(x=>x.id===editingBetId);
+    if(index!==-1){
+      const oldProfit=betProfit(data.bets[index]);
+      const newProfit=betProfit(bet);
+      data.bookmakerBalance += (newProfit-oldProfit);
+      data.bets[index]=bet;
+    }
+  }else{
+    data.bets.unshift(bet);
+    data.bookmakerBalance += betProfit(bet);
+  }
+
+  if(data.bookmakerBalance<0)data.bookmakerBalance=0;
+  editingBetId=null;
+  $('betSaveButton').textContent='Wette speichern';
+  $('odds').value='';$('stake').value='';$('cashoutAmount').value='';$('status').value='open';toggleCashout();
+  const current=nowParts();
+  $('betDate').value=current.date;$('betTime').value=current.time;
+  save();
+}
+
+function saveBookmakerBalance(){
+  const v=+$('bookmakerBalance').value;
+  if(isNaN(v)||v<0){alert('Bitte einen gültigen Kontostand eingeben.');return;}
+  data.bookmakerBalance=v;
+  save();
+}
+
+function addMoney(){
+  const amount=+$('moneyAmount').value;
+  if(!amount||amount<=0)return alert('Bitte einen gültigen Betrag eintragen.');
+
+  const booking={id:editingMoneyId||Date.now(),type:$('moneyType').value,amount,date:$('moneyDate').value,time:$('moneyTime').value};
+  const signedValue=x=>x.type==='deposit'?x.amount:-x.amount;
+
+  if(editingMoneyId){
+    const index=data.money.findIndex(x=>x.id===editingMoneyId);
+    if(index!==-1){
+      const oldValue=signedValue(data.money[index]);
+      const newValue=signedValue(booking);
+      data.bookmakerBalance += (newValue-oldValue);
+      data.money[index]=booking;
+    }
+  }else{
+    data.money.unshift(booking);
+    data.bookmakerBalance += signedValue(booking);
+  }
+
+  if(data.bookmakerBalance<0)data.bookmakerBalance=0;
+  editingMoneyId=null;
+  $('moneySaveButton').textContent='Buchung speichern';
+  $('moneyAmount').value='';
+  const current=nowParts();
+  $('moneyDate').value=current.date;$('moneyTime').value=current.time;
+  save();
+}
+let goalDraft=[];
+
+function migrateGoals(){
+  if(!data.goal)return;
+  if(!Array.isArray(data.goal.goals)){
+    const legacy=[];
+    if(data.goal.target)legacy.push({id:1,target:+data.goal.target,note:data.goal.note||''});
+    if(data.goal.target2)legacy.push({id:2,target:+data.goal.target2,note:data.goal.note2||''});
+    if(data.goal.target3)legacy.push({id:3,target:+data.goal.target3,note:data.goal.note3||''});
+    if(data.goal.target4)legacy.push({id:4,target:+data.goal.target4,note:data.goal.note4||''});
+    data.goal={start:+data.goal.start||0,goals:legacy};
+    localStorage.setItem(STORE,JSON.stringify(data));
+  }
+}
+
+function escapeHtml(value){
+  return String(value??'').replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+}
+
+function renderGoalEditor(){
+  if(!goalDraft.length)goalDraft=[{id:Date.now(),target:'',note:''}];
+  $('goalsEditor').innerHTML=goalDraft.map((g,i)=>`<div class="goal-editor">
+    <div class="goal-editor-head"><div class="goal-editor-title">${i+1}. Ziel</div>${goalDraft.length>1?`<button class="goal-remove" type="button" onclick="removeGoalEditor(${g.id})">Entfernen</button>`:''}</div>
+    <div class="form-grid">
+      <div class="field"><label>Zielbetrag</label><input type="number" inputmode="decimal" step="0.01" value="${escapeHtml(g.target)}" oninput="updateGoalDraft(${g.id},'target',this.value)" placeholder="1000"></div>
+      <div class="field"><label>Bezeichnung (optional)</label><input type="text" value="${escapeHtml(g.label||'')}" oninput="updateGoalDraft(${g.id},'label',this.value)" placeholder="z. B. Urlaubskasse"></div>
+      <div class="field full"><label>Notiz (optional)</label><textarea oninput="updateGoalDraft(${g.id},'note',this.value)" placeholder="Notiz zu diesem Ziel">${escapeHtml(g.note||'')}</textarea></div>
+    </div>
+  </div>`).join('');
+}
+
+function updateGoalDraft(id,key,value){
+  const g=goalDraft.find(x=>x.id===id);if(g)g[key]=value;
+}
+function addGoalEditor(){
+  goalDraft.push({id:Date.now()+Math.floor(Math.random()*1000),target:'',label:'',note:''});
+  renderGoalEditor();
+}
+function removeGoalEditor(id){
+  goalDraft=goalDraft.filter(x=>x.id!==id);
+  renderGoalEditor();
+}
+function loadGoalDraft(){
+  migrateGoals();
+  goalDraft=data.goal?.goals?.map(g=>({...g,target:String(g.target)}))||[{id:Date.now(),target:'',label:'',note:''}];
+  renderGoalEditor();
+}
+function saveGoal(){
+  const start=+$('goalStart').value;
+  const goals=goalDraft.map((g,i)=>({id:g.id||Date.now()+i,target:+g.target,label:(g.label||'').trim(),note:(g.note||'').trim()}));
+  if(isNaN(start)||start<0)return alert('Bitte einen gültigen Startbetrag eintragen.');
+  if(!goals.length||goals.some(g=>!Number.isFinite(g.target)||g.target<0))return alert('Bitte für jedes Ziel einen gültigen Zielbetrag eintragen.');
+  data.goal={start,goals};
+  save();
+  go('dashboard',0);
+}
+
+function delBet(id){
+  if(confirm('Wette löschen?')){
+    const bet=data.bets.find(x=>x.id===id);
+    if(bet)data.bookmakerBalance-=betProfit(bet);
+    if(data.bookmakerBalance<0)data.bookmakerBalance=0;
+    data.bets=data.bets.filter(x=>x.id!==id);
+    save();
+  }
+}
+function delMoney(id){
+  if(confirm('Buchung löschen?')){
+    const booking=data.money.find(x=>x.id===id);
+    if(booking)data.bookmakerBalance-=(booking.type==='deposit'?booking.amount:-booking.amount);
+    if(data.bookmakerBalance<0)data.bookmakerBalance=0;
+    data.money=data.money.filter(x=>x.id!==id);
+    save();
+  }
+}
+function statusText(s){return({open:'Offen',won:'Gewonnen',lost:'Verloren',cashout:'Cashout',void:'Storniert'})[s]}
+function totals(){
+  const profit=data.bets.reduce((s,b)=>s+betProfit(b),0);
+  const deposits=data.money.filter(x=>x.type==='deposit').reduce((s,x)=>s+x.amount,0);
+  const withdrawals=data.money.filter(x=>x.type==='withdrawal').reduce((s,x)=>s+x.amount,0);
+  return{profit,deposits,withdrawals,bankroll:deposits-withdrawals+profit};
+}
+function betRow(b,running=null){
+  const p=betProfit(b);
+  return `<div class="row">
+    <div>
+      <div class="row-title">${b.date||''} · ${b.time||''}</div>
+      <div class="row-meta">Quote ${b.odds.toFixed(2)} · Einsatz ${euro(b.stake)}${running!==null?`<br>Zwischenstand ${euro(running)}`:''}</div>
+    </div>
+    <div class="row-right">
+      <span class="status ${b.status}">${statusText(b.status)}</span>
+      <div class="${p>0?'green':p<0?'red':''}" style="font-weight:900;margin-top:8px">${b.status==='open'||b.status==='void'?'—':(p>0?'+':'')+euro(p)}</div>
+      <div style="display:flex;gap:10px;justify-content:flex-end"><button class="delete" onclick="editBet(${b.id})">bearbeiten</button><button class="delete" onclick="delBet(${b.id})">löschen</button></div>
+    </div>
+  </div>`;
+}
+function render(){
+  const t=totals();
+  $('bookmakerBalance').value=data.bookmakerBalance||0;
+  $('heroBankroll').textContent=euro(data.bookmakerBalance);
+  $('profit').textContent=euro(t.profit);$('profit').className='value '+(t.profit>0?'green':t.profit<0?'red':'');
+  $('openCount').textContent=data.bets.filter(b=>b.status==='open').length;
+  $('deposits').textContent=euro(t.deposits);$('withdrawals').textContent=euro(t.withdrawals);
+  $('betCountHero').textContent=`${data.bets.length} ${data.bets.length===1?'Wette':'Wetten'}`;
+
+  $('recentBets').innerHTML=data.bets.slice(0,5).map(betRow).join('')||'<div class="empty">Noch keine Wetten eingetragen.</div>';
+  $('allBets').innerHTML=data.bets.map(betRow).join('')||'<div class="empty">Noch keine Wetten eingetragen.</div>';
+
+  $('sumDeposits').textContent=euro(t.deposits);
+  $('sumWithdrawals').textContent=euro(t.withdrawals);
+  $('sumProfit').textContent=euro(t.profit);
+  $('sumBankroll').textContent=euro(data.bookmakerBalance);
+
+  $('moneyList').innerHTML=data.money.map(m=>`<div class="row">
+    <div><div class="row-title">${m.type==='deposit'?'Einzahlung':'Auszahlung'}</div><div class="row-meta">${m.date||''} · ${m.time||''}</div></div>
+    <div class="row-right"><div class="${m.type==='deposit'?'green':'red'}" style="font-weight:900">${m.type==='deposit'?'+':'-'}${euro(m.amount)}</div><div style="display:flex;gap:10px;justify-content:flex-end"><button class="delete" onclick="editMoney(${m.id})">bearbeiten</button><button class="delete" onclick="delMoney(${m.id})">löschen</button></div></div>
+  </div>`).join('')||'<div class="empty">Noch keine Buchungen vorhanden.</div>';
+
+  migrateGoals();
+  if(data.goal && Array.isArray(data.goal.goals) && data.goal.goals.length){
+    $('goalStart').value=data.goal.start;
+    if(!goalDraft.length)loadGoalDraft();
+
+    const goals=data.goal.goals.map((g,i)=>({
+      ...g,
+      index:i+1,
+      start:i===0?data.goal.start:data.goal.goals[i-1].target
+    }));
+
+    let activeIndex=goals.findIndex(g=>data.bookmakerBalance<g.target);
+    if(activeIndex===-1)activeIndex=goals.length-1;
+    const activeGoal=goals[activeIndex];
+    const allReached=goals.every(g=>data.bookmakerBalance>=g.target);
+    const denominator=activeGoal.target-activeGoal.start;
+    let pct;
+    if(denominator===0)pct=data.bookmakerBalance>=activeGoal.target?100:0;
+    else pct=Math.max(0,Math.min(100,((data.bookmakerBalance-activeGoal.start)/denominator)*100));
+    const remaining=Math.max(0,activeGoal.target-data.bookmakerBalance);
+    const range=`${euro(activeGoal.start)} → ${euro(activeGoal.target)}`;
+    const displayNote=activeGoal.note||activeGoal.label||'';
+
+    $('goalNoteDisplay').textContent=displayNote;
+    $('goalNoteDisplay').style.display=displayNote?'block':'none';
+    ['goalRange','goalRange2'].forEach(id=>$(id).textContent=`${activeGoal.index}. Ziel: ${range}`);
+    ['goalPct','goalPct2'].forEach(id=>$(id).textContent=pct.toFixed(1)+' %');
+    ['goalBar','goalBar2'].forEach(id=>$(id).style.width=pct+'%');
+    ['goalRemaining','goalRemaining2'].forEach(id=>$(id).textContent=allReached?'Alle Ziele erreicht':remaining>0?`Noch ${euro(remaining)}`:`${activeGoal.index}. Ziel erreicht`);
+    $('goalBankroll').textContent=euro(data.bookmakerBalance);
+    $('goalProfit').textContent=`${euro(data.bookmakerBalance-data.goal.start)} seit Start`;
+    $('goalChips').innerHTML=goals.map((g,i)=>{
+      const done=data.bookmakerBalance>=g.target;
+      const active=!allReached&&i===activeIndex;
+      return `<div class="goal-chip ${done?'done':''} ${active?'active':''}"><strong>${g.index}. Ziel</strong><div>${euro(g.target)}</div><div class="row-meta">${done?'Erreicht':active?'Aktiv':'Geplant'}</div></div>`;
+    }).join('');
+
+    let running=data.goal.start;
+    $('goalHistory').innerHTML=[...data.bets].reverse().map(b=>{
+      if(b.status!=='open'&&b.status!=='void')running+=betProfit(b);
+      return betRow(b,running);
+    }).join('')||'<div class="empty">Noch keine Wetten eingetragen.</div>';
+  }else{
+    $('goalStart').value='';
+    if(!goalDraft.length)loadGoalDraft();
+    $('goalNoteDisplay').textContent='';
+    $('goalNoteDisplay').style.display='none';
+    $('goalChips').innerHTML='';
+    ['goalRange','goalRange2'].forEach(id=>$(id).textContent='Noch kein Ziel');
+    ['goalPct','goalPct2'].forEach(id=>$(id).textContent='0 %');
+    ['goalBar','goalBar2'].forEach(id=>$(id).style.width='0%');
+    ['goalRemaining','goalRemaining2'].forEach(id=>$(id).textContent='Ziel festlegen');
+    $('goalBankroll').textContent=euro(data.bookmakerBalance);
+    $('goalProfit').textContent='0,00 € seit Start';
+    $('goalHistory').innerHTML='<div class="empty">Lege zuerst ein Ziel fest.</div>';
+  }
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='betbalance-backup.json';a.click();URL.revokeObjectURL(a.href);
+}
+function importData(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{const parsed=JSON.parse(r.result);data={bets:parsed.bets||[],money:parsed.money||[],goal:parsed.goal||null,bookmakerBalance:parsed.bookmakerBalance||0};save();alert('Daten erfolgreich importiert.')}catch{alert('Diese Datei ist ungültig.')}};
+  r.readAsText(f);
+}
+function resetData(){if(confirm('Wirklich alle Daten löschen?')){data={bets:[],money:[],goal:null,bookmakerBalance:0};editingBetId=null;editingMoneyId=null;goalDraft=[];save();loadGoalDraft()}}
+loadGoalDraft();
+render();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(console.error);
+  });
+}
+</script>
+</body>
+</html>
