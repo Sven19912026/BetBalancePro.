@@ -216,7 +216,7 @@ textarea{min-height:92px;resize:vertical}
   left:0;right:0;bottom:0;
   z-index:30;
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:repeat(5,1fr);
   max-width:760px;
   margin:0 auto;
   padding-bottom:env(safe-area-inset-bottom);
@@ -257,6 +257,21 @@ textarea{min-height:92px;resize:vertical}
 .goal-chip{min-width:120px;border:1px solid var(--line);background:#132035;border-radius:13px;padding:10px}
 .goal-chip.active{border-color:#5b8cff;background:#172b50}
 .goal-chip.done{border-color:#22774e;background:#123c2b}
+
+.rules-hero{background:linear-gradient(135deg,#20375f,#162a48 60%,#10213a);border:1px solid #34527e;border-radius:24px;padding:20px;box-shadow:var(--shadow);margin-bottom:14px}
+.rules-hero h2{margin:6px 0 8px;font-size:25px}
+.rules-hero p{margin:0;color:#b9c8da;line-height:1.5}
+.rules-list{display:grid;gap:10px}
+.rule-item{display:flex;align-items:flex-start;gap:12px;background:rgba(17,28,48,.96);border:1px solid var(--line);border-radius:16px;padding:14px;transition:.2s ease}
+.rule-item:has(input:checked){border-color:#24784f;background:#123b2b}
+.rule-item input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--green);flex:0 0 auto}
+.rule-text{font-weight:800;line-height:1.4}
+.rule-sub{display:block;color:var(--muted);font-size:12px;font-weight:500;margin-top:3px}
+.rules-status{margin-top:14px;border-radius:16px;padding:15px;font-weight:900;text-align:center;border:1px solid #6d303b;background:#421d25;color:#ffd0d5}
+.rules-status.ok{border-color:#24784f;background:#123b2b;color:#baf4d3}
+.mental-card{margin-top:14px;border:1px solid #6b5421;background:#372b13;border-radius:18px;padding:16px}
+.mental-card strong{display:block;color:#ffe2a0;font-size:18px;margin-bottom:5px}
+
 @media(max-width:520px){
   .form-grid{grid-template-columns:1fr}
   .field.full{grid-column:auto}
@@ -277,6 +292,33 @@ textarea{min-height:92px;resize:vertical}
 </header>
 
 <main>
+
+  <section id="rules" class="page">
+    <div class="rules-hero">
+      <div class="eyebrow">Vor jeder Wette kurz prüfen</div>
+      <h2>📋 Wettregeln</h2>
+      <p>Die Checkliste hilft dir, konsequent nach deinem Plan zu handeln.</p>
+    </div>
+
+    <div class="rules-list">
+      <label class="rule-item"><input type="checkbox" class="rule-check" data-rule="women"><span class="rule-text">Keine Frauenspiele</span></label>
+      <label class="rule-item"><input type="checkbox" class="rule-check" data-rule="locals"><span class="rule-text">Nicht gegen Locals</span></label>
+      <label class="rule-item"><input type="checkbox" class="rule-check" data-rule="age"><span class="rule-text">Keine Oldies gegen deutlich Jüngere</span></label>
+      <label class="rule-item"><input type="checkbox" class="rule-check" data-rule="mto"><span class="rule-text">Nicht nach MTO oder Aufgabe in den letzten Spielen<span class="rule-sub">Vorher Twitter bzw. aktuelle Informationen prüfen.</span></span></label>
+      <label class="rule-item"><input type="checkbox" class="rule-check" data-rule="thirdset"><span class="rule-text">Nicht im 3. Satz, nachdem eine klare Führung abgegeben wurde</span></label>
+      <label class="rule-item"><input type="checkbox" class="rule-check" data-rule="schedule"><span class="rule-text">Sonntag Challenger-Quali oder Samstag ATP-Tour besonders aufpassen</span></label>
+      <label class="rule-item"><input type="checkbox" class="rule-check" data-rule="weather"><span class="rule-text">Wetter-App geprüft</span></label>
+    </div>
+
+    <div class="mental-card">
+      <strong>🧠 Nach einem Verlust Geduld bewahren!</strong>
+      <span>Keine Revanche-Wette. Nach Plan handeln, nicht nach Emotionen.</span>
+    </div>
+
+    <div id="rulesStatus" class="rules-status">❌ Noch nicht alle Wettregeln geprüft.</div>
+    <button class="secondary" style="margin-top:10px" onclick="resetRules()">Checkliste zurücksetzen</button>
+  </section>
+
   <section id="dashboard" class="page active">
     <div class="hero">
       <div class="eyebrow">Aktueller Buchmacher-Kontostand</div>
@@ -287,9 +329,9 @@ textarea{min-height:92px;resize:vertical}
     </div>
 
     <div class="action-grid">
-      <button class="action" onclick="go('bets',1)"><strong>＋</strong>Neue Wette</button>
-      <button class="action" onclick="go('money',2)"><strong>€</strong>Zahlung</button>
-      <button class="action" onclick="go('goal',3)"><strong>🎯</strong>Ziel</button>
+      <button class="action" onclick="go('bets',2)"><strong>＋</strong>Neue Wette</button>
+      <button class="action" onclick="go('money',3)"><strong>€</strong>Zahlung</button>
+      <button class="action" onclick="go('goal',4)"><strong>🎯</strong>Ziel</button>
     </div>
 
     <div class="grid">
@@ -299,7 +341,7 @@ textarea{min-height:92px;resize:vertical}
       <div class="card"><div class="label">Auszahlungen</div><div id="withdrawals" class="value red">0,00 €</div></div>
     </div>
 
-    <div class="section-head"><h2>Letzte Wetten</h2><button class="small-btn" onclick="go('bets',1)">Alle anzeigen</button></div>
+    <div class="section-head"><h2>Letzte Wetten</h2><button class="small-btn" onclick="go('bets',2)">Alle anzeigen</button></div>
     <div id="recentBets" class="card list"></div>
   </section>
 
@@ -405,14 +447,45 @@ textarea{min-height:92px;resize:vertical}
 </div>
 
 <nav class="bottom-nav">
-  <button class="nav active" onclick="go('dashboard',0)"><span>⌂</span>Übersicht</button>
-  <button class="nav" onclick="go('bets',1)"><span>＋</span>Wetten</button>
-  <button class="nav" onclick="go('money',2)"><span>€</span>Zahlungen</button>
-  <button class="nav" onclick="go('goal',3)"><span>🎯</span>Ziel</button>
+  <button class="nav" onclick="go('rules',0)"><span>📋</span>Regeln</button>
+  <button class="nav active" onclick="go('dashboard',1)"><span>⌂</span>Übersicht</button>
+  <button class="nav" onclick="go('bets',2)"><span>＋</span>Wetten</button>
+  <button class="nav" onclick="go('money',3)"><span>€</span>Zahlungen</button>
+  <button class="nav" onclick="go('goal',4)"><span>🎯</span>Ziel</button>
 </nav>
 
 <script>
 const STORE='betbalance_pro_v1';
+
+const RULES_STORE='betbalance_pro_rules_v1';
+function loadRules(){
+  let saved={};
+  try{saved=JSON.parse(localStorage.getItem(RULES_STORE)||'{}')}catch{}
+  document.querySelectorAll('.rule-check').forEach(box=>{
+    box.checked=!!saved[box.dataset.rule];
+    box.addEventListener('change',saveRules);
+  });
+  updateRulesStatus();
+}
+function saveRules(){
+  const saved={};
+  document.querySelectorAll('.rule-check').forEach(box=>saved[box.dataset.rule]=box.checked);
+  localStorage.setItem(RULES_STORE,JSON.stringify(saved));
+  updateRulesStatus();
+}
+function updateRulesStatus(){
+  const boxes=[...document.querySelectorAll('.rule-check')];
+  const complete=boxes.length>0&&boxes.every(box=>box.checked);
+  const status=$('rulesStatus');
+  if(!status)return;
+  status.classList.toggle('ok',complete);
+  status.textContent=complete?'✅ Alle Regeln geprüft. Wette kann bewertet werden.':'❌ Noch nicht alle Wettregeln geprüft.';
+}
+function resetRules(){
+  document.querySelectorAll('.rule-check').forEach(box=>box.checked=false);
+  saveRules();
+}
+
 const BACKUP_STORE='betbalance_pro_backups_v1';
 const MAX_BACKUPS=30;
 let data=JSON.parse(localStorage.getItem(STORE)||'{"bets":[],"money":[],"goal":null,"bookmakerBalance":0}');
@@ -424,6 +497,7 @@ const euro=n=>(Number(n)||0).toLocaleString('de-DE',{style:'currency',currency:'
 const nowParts=()=>{const d=new Date();return{date:d.toISOString().slice(0,10),time:d.toTimeString().slice(0,5)}};
 const n=nowParts();
 $('betDate').value=n.date;$('betTime').value=n.time;$('moneyDate').value=n.date;$('moneyTime').value=n.time;
+loadRules();
 
 function go(id,index){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -623,7 +697,7 @@ function saveGoal(){
   if(!goals.length||goals.some(g=>!Number.isFinite(g.target)||g.target<0))return alert('Bitte für jedes Ziel einen gültigen Zielbetrag eintragen.');
   data.goal={start,goals};
   save();
-  go('dashboard',0);
+  go('dashboard',1);
 }
 
 function editBet(id){
@@ -638,7 +712,7 @@ function editBet(id){
   $('cashoutAmount').value=bet.cashout||'';
   toggleCashout();
   $('betSaveButton').textContent='Änderungen speichern';
-  go('bets',1);
+  go('bets',2);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function editMoney(id){
@@ -650,7 +724,7 @@ function editMoney(id){
   $('moneyDate').value=booking.date||'';
   $('moneyTime').value=booking.time||'';
   $('moneySaveButton').textContent='Änderungen speichern';
-  go('money',2);
+  go('money',3);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function delBet(id){

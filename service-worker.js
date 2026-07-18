@@ -1,4 +1,4 @@
-const CACHE_NAME = 'betbalance-pro-v2';
+const CACHE_NAME = 'betbalance-pro-v3';
 const APP_SHELL = [
   './',
   './index.html',

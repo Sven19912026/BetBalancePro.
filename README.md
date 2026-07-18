@@ -32,3 +32,8 @@ Hinweis: Beim Löschen der Browser-/Websitedaten können lokale App-Daten verlor
 - Import und Wiederherstellung.
 - Lokale automatische Sicherungen (maximal 30).
 - Tägliche Sicherung nach 22:00 Uhr bzw. beim nächsten Öffnen.
+
+## Update Wettregeln
+- Neue Seite "Wettregeln" links neben der Übersicht
+- Lokale Checkliste mit Statusanzeige
+- Bestehende App-Daten und Speicherschlüssel bleiben unverändert
