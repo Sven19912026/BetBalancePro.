@@ -389,9 +389,11 @@ textarea{min-height:92px;resize:vertical}
     <div class="section-head"><h2>Datensicherung</h2></div>
     <div class="form-card">
       <div class="form-grid">
-        <div class="field full"><button class="secondary" onclick="exportData()">Daten exportieren</button></div>
+        <div class="field full"><div id="backupStatus" class="goal-note" style="margin:0">Noch keine automatische Sicherung vorhanden.</div></div>
+        <div class="field full"><button class="secondary" onclick="exportData()">Backup-Datei herunterladen</button></div>
+        <div class="field full"><button class="secondary" onclick="restoreLatestBackup()">Letzte automatische Sicherung wiederherstellen</button></div>
         <div class="field full">
-          <label class="secondary" style="display:block;text-align:center;cursor:pointer">Daten importieren
+          <label class="secondary" style="display:block;text-align:center;cursor:pointer">Backup-Datei importieren
             <input type="file" accept=".json" onchange="importData(event)" style="display:none">
           </label>
         </div>
@@ -411,6 +413,8 @@ textarea{min-height:92px;resize:vertical}
 
 <script>
 const STORE='betbalance_pro_v1';
+const BACKUP_STORE='betbalance_pro_backups_v1';
+const MAX_BACKUPS=30;
 let data=JSON.parse(localStorage.getItem(STORE)||'{"bets":[],"money":[],"goal":null,"bookmakerBalance":0}');
 if(data.bookmakerBalance===undefined)data.bookmakerBalance=0;
 let editingBetId=null;
@@ -427,7 +431,73 @@ function go(id,index){
   document.querySelectorAll('.nav').forEach((b,i)=>b.classList.toggle('active',i===index));
   window.scrollTo({top:0,behavior:'smooth'});
 }
-function save(){localStorage.setItem(STORE,JSON.stringify(data));render()}
+function save(){
+  localStorage.setItem(STORE,JSON.stringify(data));
+  createRecoverySnapshot();
+  render();
+}
+function getBackups(){
+  try{return JSON.parse(localStorage.getItem(BACKUP_STORE)||'[]')}catch{return []}
+}
+function setBackups(backups){localStorage.setItem(BACKUP_STORE,JSON.stringify(backups.slice(0,MAX_BACKUPS)))}
+function backupDateKey(date=new Date()){return date.toISOString().slice(0,10)}
+function createBackup(reason='automatisch'){
+  const backups=getBackups();
+  const snapshot={id:Date.now(),createdAt:new Date().toISOString(),dateKey:backupDateKey(),reason,data:JSON.parse(JSON.stringify(data))};
+  backups.unshift(snapshot);
+  setBackups(backups);
+  updateBackupStatus();
+  return snapshot;
+}
+function createRecoverySnapshot(){
+  const backups=getBackups();
+  const last=backups[0];
+  const now=Date.now();
+  if(!last || last.reason!=='Sicherung nach Änderung' || now-new Date(last.createdAt).getTime()>5*60*1000){
+    createBackup('Sicherung nach Änderung');
+  }else{
+    last.createdAt=new Date().toISOString();
+    last.data=JSON.parse(JSON.stringify(data));
+    backups[0]=last;
+    setBackups(backups);
+  }
+}
+function runDailyBackup(){
+  const now=new Date();
+  const backups=getBackups();
+  const today=backupDateKey(now);
+  const hasToday=backups.some(b=>b.dateKey===today && b.reason==='Tägliche Sicherung');
+  if(now.getHours()>=22 && !hasToday)createBackup('Tägliche Sicherung');
+  if(now.getHours()<22){
+    const yesterday=new Date(now);yesterday.setDate(yesterday.getDate()-1);
+    const yKey=backupDateKey(yesterday);
+    const hasYesterday=backups.some(b=>b.dateKey===yKey && b.reason==='Tägliche Sicherung');
+    if(!hasYesterday){
+      const snap=createBackup('Tägliche Sicherung');
+      const all=getBackups();all[0].dateKey=yKey;setBackups(all);
+    }
+  }
+  updateBackupStatus();
+}
+function updateBackupStatus(){
+  const el=$('backupStatus');if(!el)return;
+  const backups=getBackups();
+  if(!backups.length){el.textContent='Noch keine automatische Sicherung vorhanden.';return;}
+  const last=backups[0];
+  const d=new Date(last.createdAt);
+  el.textContent=`Letzte Sicherung: ${d.toLocaleDateString('de-DE')} um ${d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr · ${last.reason} · ${backups.length} Sicherung${backups.length===1?'':'en'} gespeichert`;
+}
+function restoreLatestBackup(){
+  const backups=getBackups();
+  if(!backups.length)return alert('Es ist noch keine automatische Sicherung vorhanden.');
+  const last=backups[0];
+  const d=new Date(last.createdAt);
+  if(!confirm(`Sicherung vom ${d.toLocaleDateString('de-DE')} um ${d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr wiederherstellen? Aktuelle Änderungen werden ersetzt.`))return;
+  data=JSON.parse(JSON.stringify(last.data));
+  localStorage.setItem(STORE,JSON.stringify(data));
+  editingBetId=null;editingMoneyId=null;goalDraft=[];
+  loadGoalDraft();render();alert('Die letzte Sicherung wurde wiederhergestellt.');
+}
 function toggleCashout(){$('cashoutField').style.display=$('status').value==='cashout'?'block':'none'}
 function betProfit(b){
   if(b.status==='won') return b.stake*(b.odds-1);
@@ -556,6 +626,33 @@ function saveGoal(){
   go('dashboard',0);
 }
 
+function editBet(id){
+  const bet=data.bets.find(x=>x.id===id);
+  if(!bet)return;
+  editingBetId=id;
+  $('betDate').value=bet.date||'';
+  $('betTime').value=bet.time||'';
+  $('odds').value=bet.odds;
+  $('stake').value=bet.stake;
+  $('status').value=bet.status;
+  $('cashoutAmount').value=bet.cashout||'';
+  toggleCashout();
+  $('betSaveButton').textContent='Änderungen speichern';
+  go('bets',1);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function editMoney(id){
+  const booking=data.money.find(x=>x.id===id);
+  if(!booking)return;
+  editingMoneyId=id;
+  $('moneyType').value=booking.type;
+  $('moneyAmount').value=booking.amount;
+  $('moneyDate').value=booking.date||'';
+  $('moneyTime').value=booking.time||'';
+  $('moneySaveButton').textContent='Änderungen speichern';
+  go('money',2);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 function delBet(id){
   if(confirm('Wette löschen?')){
     const bet=data.bets.find(x=>x.id===id);
@@ -675,18 +772,35 @@ function render(){
   }
 }
 function exportData(){
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='betbalance-backup.json';a.click();URL.revokeObjectURL(a.href);
+  const packageData={app:'BetBalance Pro',version:2,exportedAt:new Date().toISOString(),data};
+  const blob=new Blob([JSON.stringify(packageData,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`betbalance-backup-${backupDateKey()}.json`;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  createBackup('Manuelles Datei-Backup');
 }
 function importData(e){
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
-  r.onload=()=>{try{const parsed=JSON.parse(r.result);data={bets:parsed.bets||[],money:parsed.money||[],goal:parsed.goal||null,bookmakerBalance:parsed.bookmakerBalance||0};save();alert('Daten erfolgreich importiert.')}catch{alert('Diese Datei ist ungültig.')}};
+  r.onload=()=>{try{
+    const parsed=JSON.parse(r.result);
+    const source=parsed.data||parsed;
+    if(!Array.isArray(source.bets)||!Array.isArray(source.money))throw new Error('invalid');
+    createBackup('Vor Import');
+    data={bets:source.bets||[],money:source.money||[],goal:source.goal||null,bookmakerBalance:Number(source.bookmakerBalance)||0};
+    localStorage.setItem(STORE,JSON.stringify(data));
+    editingBetId=null;editingMoneyId=null;goalDraft=[];loadGoalDraft();render();createBackup('Nach Import');
+    alert('Daten erfolgreich importiert.');
+  }catch{alert('Diese Backup-Datei ist ungültig.')}finally{e.target.value=''}};
   r.readAsText(f);
 }
-function resetData(){if(confirm('Wirklich alle Daten löschen?')){data={bets:[],money:[],goal:null,bookmakerBalance:0};editingBetId=null;editingMoneyId=null;goalDraft=[];save();loadGoalDraft()}}
+function resetData(){if(confirm('Wirklich alle Daten löschen? Vorher wird automatisch eine Sicherung erstellt.')){createBackup('Vor vollständigem Löschen');data={bets:[],money:[],goal:null,bookmakerBalance:0};editingBetId=null;editingMoneyId=null;goalDraft=[];localStorage.setItem(STORE,JSON.stringify(data));render();loadGoalDraft();updateBackupStatus()}}
 loadGoalDraft();
 render();
+runDailyBackup();
+setInterval(runDailyBackup,60*1000);
 </script>
 <script>
 if ('serviceWorker' in navigator) {

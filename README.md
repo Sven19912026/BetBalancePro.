@@ -25,3 +25,10 @@ Diese Version ist eine installierbare Progressive Web App. Alle Daten bleiben lo
 3. **App installieren** oder **Zum Startbildschirm hinzufügen** auswählen.
 
 Hinweis: Beim Löschen der Browser-/Websitedaten können lokale App-Daten verloren gehen. Regelmäßig die eingebaute Backup-Funktion verwenden.
+
+## Version 2
+- Wetten und Ein-/Auszahlungen lassen sich jetzt bearbeiten.
+- Manuelles Backup als JSON-Datei.
+- Import und Wiederherstellung.
+- Lokale automatische Sicherungen (maximal 30).
+- Tägliche Sicherung nach 22:00 Uhr bzw. beim nächsten Öffnen.
