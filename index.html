@@ -284,7 +284,7 @@ textarea{min-height:92px;resize:vertical}
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
+<script src="firebase-config.js?v=5"></script>
 </head>
 <body><div style="position:fixed;top:8px;right:8px;z-index:2000;display:flex;gap:7px;align-items:center"><span id="cloudStatus" class="cloud-status">Cloud startet …</span><button class="small-btn" onclick="cloudLogout()">Abmelden</button></div>
 <div id="authLayer" class="cloud-auth hidden"><div class="cloud-auth-card"><h2>Private Cloud</h2><p>Mit demselben Konto werden Finanzen und Sportwetten auf allen Geräten synchronisiert.</p><label>E-Mail</label><input id="authEmail" type="email" autocomplete="email"><label>Passwort</label><input id="authPassword" type="password" minlength="6" autocomplete="current-password"><div id="authMessage" class="cloud-message"></div><button class="btn primary" onclick="cloudLogin()">Anmelden</button><button class="btn secondary" onclick="cloudRegister()">Konto erstellen</button></div></div>
@@ -887,8 +887,13 @@ setInterval(runDailyBackup,60*1000);
 </script>
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js').catch(console.error);
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('./service-worker.js?v=5', { updateViaCache: 'none' });
+      await registration.update();
+    } catch (error) {
+      console.error(error);
+    }
   });
 }
 </script>
@@ -899,6 +904,6 @@ window.exportCloudState=()=>{let rules={};try{rules=JSON.parse(localStorage.getI
 window.normalizeCloudState=s=>({data:s?.data&&typeof s.data==='object'?s.data:{bets:[],money:[],goal:null,bookmakerBalance:0},rules:s?.rules&&typeof s.rules==='object'?s.rules:{}});
 window.importCloudState=s=>{const n=window.normalizeCloudState(s);data=n.data;if(data.bookmakerBalance===undefined)data.bookmakerBalance=0;localStorage.setItem(STORE,JSON.stringify(data));localStorage.setItem(RULES_STORE,JSON.stringify(n.rules));document.querySelectorAll('.rule-check').forEach(box=>box.checked=!!n.rules[box.dataset.rule]);updateRulesStatus();render();loadGoalDraft();updateBackupStatus();};
 </script>
-<script src="cloud-sync.js"></script>
+<script src="cloud-sync.js?v=5"></script>
 </body>
 </html>
