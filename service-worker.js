@@ -1,8 +1,8 @@
-const CACHE_NAME = 'betbalance-pro-v3';
+const CACHE_NAME = 'betbalance-pro-cloud-v3';
 const APP_SHELL = [
   './',
   './index.html',
-  './manifest.webmanifest',
+  './manifest.webmanifest','./firebase-config.js','./cloud-sync.js',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
